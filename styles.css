@@ -1,0 +1,97 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  /* background-image: url('giphy.webp'); Background image URL */
+  background-image: url('gif.gif'); /* Background image URL */
+
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8); 
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  color: #333333;
+}
+
+.image {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  width: 150px;
+  height: auto;
+}
+
+button {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px; /* Reduced margin */
+  margin-bottom: 10px; /* Added margin */
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+#result {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #333333;
+}
+
+.modulation-controls {
+  margin-top: 20px;
+}
+
+label {
+  margin-right: 10px;
+  font-size: 16px;
+  color: #333333;
+}
+
+input[type="range"] {
+  margin: 0 10px 20px 0;
+}
+
+select {
+  margin: 0 10px 20px 0;
+  padding: 5px;
+  font-size: 16px;
+}
+
+textarea {
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 18px; /* Increased font size */
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.speech-bubble {
+  display: none;
+  margin: 10px 0;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
