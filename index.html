@@ -3,17 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech to Text with Voice Modulation</title>
+    <title>Speech to Text with Voice Modulation + Download</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
       <h1>Say Something</h1>
 
-      <!-- Added image -->
       <button onclick="startRecognition()">Start Recognition</button>
       <div id="speech-bubble" class="speech-bubble"></div>
-      <!-- Speech recognition bubble -->
+
       <textarea
         id="text-to-speak"
         rows="6"
@@ -21,6 +20,7 @@
         placeholder="Type your text here..."
       ></textarea>
       <p id="result"></p>
+
       <div class="modulation-controls">
         <label for="pitch">Pitch:</label>
         <input
@@ -45,13 +45,18 @@
         <label for="voice">Voice:</label>
         <select id="voice"></select>
       </div>
-      <button onclick="speakText()">Speak</button>
+
+      <button onclick="speakText()">Speak & Record</button>
       <button onclick="stopSpeech()">Stop</button>
       <button onclick="pauseSpeech()">Pause</button>
       <button onclick="resumeSpeech()">Resume</button>
-      <button onclick="speakText()">Speak & Record</button>
+
+      <!-- download link appears after recording -->
+      <a id="downloadLink" style="display: none" download="speech.webm"
+        >Download Recording</a
+      >
     </div>
+
     <script src="scripts.js"></script>
   </body>
 </html>
-
