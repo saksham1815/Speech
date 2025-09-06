@@ -1,71 +1,133 @@
+function populateVoiceList() {
+  if (typeof speechSynthesis === "undefined") return;
+
+  const voices = speechSynthesis.getVoices();
+  const voiceSelect = document.getElementById("voice");
+  voiceSelect.innerHTML = "";
+
+  const groupedVoices = voices.reduce((acc, voice) => {
+    if (!acc[voice.lang]) acc[voice.lang] = [];
+    acc[voice.lang].push(voice);
+    return acc;
+  }, {});
+
+  for (const lang in groupedVoices) {
+    const optgroup = document.createElement("optgroup");
+    optgroup.label = lang;
+    groupedVoices[lang].forEach((voice) => {
+      const option = document.createElement("option");
+      option.textContent = `${voice.name} (${voice.lang})`;
+      option.setAttribute("data-name", voice.name);
+      optgroup.appendChild(option);
+    });
+    voiceSelect.appendChild(optgroup);
+  }
+}
+populateVoiceList();
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = populateVoiceList;
+}
+
+// Speech Recognition
+function startRecognition() {
+  if (!("webkitSpeechRecognition" in window)) {
+    alert("Your browser doesn't support Speech Recognition. Use Chrome.");
+    return;
+  }
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.lang = "en-US";
+
+  recognition.onresult = function (event) {
+    let interimTranscript = "";
+    let finalTranscript = "";
+    for (let i = 0; i < event.results.length; ++i) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript;
+      } else {
+        interimTranscript += event.results[i][0].transcript;
+      }
+    }
+    document.getElementById("speech-bubble").innerText = interimTranscript;
+    document.getElementById("result").innerText = finalTranscript;
+  };
+
+  recognition.onerror = function (event) {
+    alert("Error: " + event.error);
+  };
+
+  recognition.onend = function () {
+    document.getElementById("speech-bubble").style.display = "none";
+  };
+
+  document.getElementById("speech-bubble").style.display = "block";
+  recognition.start();
+}
+
 let utterance;
 let mediaRecorder;
-let audioChunks = [];
+let chunks = [];
 
 function speakText() {
-  var resultText = document.getElementById('result').innerText;
-  var inputText = document.getElementById('text-to-speak').value;
+  const resultText = document.getElementById("result").innerText;
+  const inputText = document.getElementById("text-to-speak").value;
+  let textToSpeak = inputText || resultText;
 
-  var textToSpeak = "";
-
-  if (inputText !== "" && resultText !== "") {
-    textToSpeak = inputText + ". " + resultText;
-  } else if (inputText !== "") {
-    textToSpeak = inputText;
-  } else if (resultText !== "") {
-    textToSpeak = resultText;
-  } else {
-    alert("No text to speak. Please recognize or type some text first.");
+  if (!textToSpeak) {
+    alert("No text to speak!");
     return;
   }
 
   utterance = new SpeechSynthesisUtterance(textToSpeak);
 
-  // Set pitch, rate, and voice
-  utterance.pitch = parseFloat(document.getElementById('pitch').value);
-  utterance.rate = parseFloat(document.getElementById('rate').value);
+  utterance.pitch = parseFloat(document.getElementById("pitch").value);
+  utterance.rate = parseFloat(document.getElementById("rate").value);
 
-  var voiceSelect = document.getElementById('voice');
-  var selectedOption = voiceSelect.selectedOptions[0].getAttribute('data-name');
-  var voices = speechSynthesis.getVoices();
-  utterance.voice = voices.find(voice => voice.name === selectedOption);
+  const selectedOption =
+    document.getElementById("voice").selectedOptions[0]?.getAttribute("data-name");
+  const voices = speechSynthesis.getVoices();
+  utterance.voice = voices.find((v) => v.name === selectedOption);
 
-  // --- Capture Audio ---
+  // Set up audio capture
   const audioContext = new AudioContext();
-  const destination = audioContext.createMediaStreamDestination();
-  const mediaStream = destination.stream;
-  
-  // Connect speech synthesis to audio context
-  const source = audioContext.createMediaStreamSource(mediaStream);
+  const dest = audioContext.createMediaStreamDestination();
+  const osc = audioContext.createOscillator();
+  osc.connect(dest);
+  osc.start();
+  osc.stop(audioContext.currentTime + 0.001);
 
-  mediaRecorder = new MediaRecorder(mediaStream);
-  audioChunks = [];
+  mediaRecorder = new MediaRecorder(dest.stream, { mimeType: "audio/webm" });
+  chunks = [];
 
-  mediaRecorder.ondataavailable = (event) => {
-    if (event.data.size > 0) {
-      audioChunks.push(event.data);
-    }
-  };
-
+  mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
   mediaRecorder.onstop = () => {
-    const audioBlob = new Blob(audioChunks, { type: "audio/webm" });
-    const audioUrl = URL.createObjectURL(audioBlob);
-
-    // Create a download link
-    const downloadLink = document.createElement("a");
-    downloadLink.href = audioUrl;
-    downloadLink.download = "speech_output.webm";
-    downloadLink.innerText = "Download Audio";
-    document.body.appendChild(downloadLink);
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    const url = URL.createObjectURL(blob);
+    const downloadLink = document.getElementById("downloadLink");
+    downloadLink.href = url;
+    downloadLink.style.display = "inline-block";
+    downloadLink.download = "speech.webm";
+    downloadLink.click(); // auto-download
   };
 
   mediaRecorder.start();
 
-  // Stop recording when speech ends
   utterance.onend = () => {
     mediaRecorder.stop();
   };
 
-  // Speak it
-  window.speechSynthesis.speak(utterance);
+  speechSynthesis.speak(utterance);
+}
+
+function stopSpeech() {
+  if (utterance) speechSynthesis.cancel();
+}
+
+function pauseSpeech() {
+  if (utterance) speechSynthesis.pause();
+}
+
+function resumeSpeech() {
+  if (utterance) speechSynthesis.resume();
 }
