@@ -25,6 +25,4 @@ A simple **browser-based app** that lets you:
 - MediaRecorder API
 - Web Audio API
 
----
 
-## 📂 Structure
